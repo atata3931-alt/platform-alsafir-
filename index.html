@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>اختبارات السفير</title>
+    <!-- Google Fonts: Cairo for Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <meta property="og:image" content="https://bolt.new/static/og_default.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
+</head>
+  <body>
+    <!-- ================================================================
+         LANDING PAGE
+         ================================================================ -->
+    <section id="landingPage" class="screen screen--landing screen--active">
+      <div class="landing__content">
+        <h1 class="landing__title">منصة اختبارات السفير</h1>
+        <p class="landing__subtitle">نظام الاختبارات الإلكترونية للمدارس</p>
+        <button id="enterBtn" class="glow-btn" type="button">
+          <span>اختبارات السفير</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         ROLE SELECTION MODAL
+         ================================================================ -->
+    <div id="roleModal" class="modal-overlay" hidden>
+      <div class="modal-box modal-box--sm">
+        <button class="modal-close" data-close-modal="roleModal" aria-label="إغلاق">&times;</button>
+        <h2 class="modal-box__title">اختر دورك</h2>
+        <p class="modal-box__subtitle">من أنت؟</p>
+        <div class="role-choices">
+          <button class="role-card role-card--student" data-role="student" type="button">
+            <span class="role-card__icon">&#127891;</span>
+            <span class="role-card__label">طالب</span>
+          </button>
+          <button class="role-card role-card--teacher" data-role="teacher" type="button">
+            <span class="role-card__icon">&#128218;</span>
+            <span class="role-card__label">سفير</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+         TEACHER PIN MODAL
+         ================================================================ -->
+    <div id="pinModal" class="modal-overlay" hidden>
+      <div class="modal-box modal-box--sm">
+        <button class="modal-close" data-close-modal="pinModal" aria-label="إغلاق">&times;</button>
+        <h2 class="modal-box__title">دخول السفير</h2>
+        <p class="modal-box__subtitle">أدخل الرمز السري للمتابعة</p>
+        <form id="pinForm">
+          <input
+            type="password"
+            id="pinInput"
+            class="pin-input"
+            placeholder="• • • •"
+            maxlength="10"
+            autocomplete="off"
+            inputmode="numeric"
+          />
+          <p id="pinError" class="form-error" hidden></p>
+          <button type="submit" class="btn btn--primary btn--block">دخول</button>
+        </form>
+        <div id="pinSetupHint" class="pin-hint" hidden>
+          <p>أول دخول — أدخل رمزاً سرياً جديداً لتأمين لوحة التحكم.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+         TEACHER DASHBOARD
+         ================================================================ -->
+    <section id="teacherDashboard" class="screen">
+      <!-- Top bar -->
+      <header class="topbar">
+        <div class="topbar__inner">
+          <div class="topbar__brand">
+            <span class="topbar__icon">&#128218;</span>
+            <span>لوحة تحكم السفير</span>
+          </div>
+          <div class="topbar__actions">
+            <button class="btn btn--ghost btn--sm" id="teacherLogoutBtn" type="button">
+              <span>&#8592;</span> خروج
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-body">
+        <!-- Sidebar / tabs -->
+        <nav class="dash-tabs">
+          <button class="dash-tab dash-tab--active" data-dash-tab="exams" type="button">
+            <span>&#128221;</span> الاختبارات
+          </button>
+          <button class="dash-tab" data-dash-tab="results" type="button">
+            <span>&#128202;</span> نتائج الطلاب
+          </button>
+        </nav>
+
+        <!-- Exams tab -->
+        <div class="dash-panel dash-panel--active" id="dashPanelExams">
+          <div class="panel-head">
+            <h2 class="panel-title">الاختبارات</h2>
+            <button class="btn btn--primary" id="createExamBtn" type="button">
+              <span>+</span> إنشاء اختبار جديد
+            </button>
+          </div>
+
+          <!-- Exams list -->
+          <div id="teacherExamsList" class="cards-grid"></div>
+          <div id="teacherExamsEmpty" class="empty-state" hidden>
+            <span class="empty-state__icon">&#128221;</span>
+            <p>لا توجد اختبارات بعد. ابدأ بإنشاء اختبار جديد.</p>
+          </div>
+        </div>
+
+        <!-- Results tab -->
+        <div class="dash-panel" id="dashPanelResults">
+          <div class="panel-head">
+            <h2 class="panel-title">سجل نتائج الطلاب</h2>
+          </div>
+          <div id="resultsTableWrap" class="results-table-wrap"></div>
+          <div id="resultsEmpty" class="empty-state" hidden>
+            <span class="empty-state__icon">&#128202;</span>
+            <p>لا توجد نتائج مسجلة بعد.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         EXAM BUILDER MODAL
+         ================================================================ -->
+    <div id="examBuilderModal" class="modal-overlay" hidden>
+      <div class="modal-box modal-box--lg">
+        <button class="modal-close" data-close-modal="examBuilderModal" aria-label="إغلاق">&times;</button>
+        <h2 class="modal-box__title" id="examBuilderTitle">إنشاء اختبار جديد</h2>
+
+        <form id="examForm">
+          <!-- Exam meta -->
+          <div class="form-row">
+            <div class="form-field">
+              <label for="examTitle">عنوان الاختبار</label>
+              <input type="text" id="examTitle" required placeholder="مثال: اختبار الرياضيات" />
+            </div>
+            <div class="form-field">
+              <label for="examSubject">المادة</label>
+              <input type="text" id="examSubject" required placeholder="مثال: رياضيات" />
+            </div>
+          </div>
+          <div class="form-row form-row--thirds">
+            <div class="form-field">
+              <label for="examDuration">المدة (دقيقة)</label>
+              <input type="number" id="examDuration" required min="1" max="300" value="30" />
+            </div>
+            <div class="form-field">
+              <label for="examPassGrade">درجة النجاح (%)</label>
+              <input type="number" id="examPassGrade" required min="1" max="100" value="50" />
+            </div>
+            <div class="form-field">
+              <label for="examShowReview">مراجعة الإجابات للطالب</label>
+              <select id="examShowReview">
+                <option value="true">نعم — يعرض الإجابات الصحيحة</option>
+                <option value="false">لا — يعرض الدرجة فقط</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- PDF link -->
+          <div class="form-field">
+            <label for="examPdfUrl">رابط ملف PDF لورقة الاختبار (اختياري)</label>
+            <input type="url" id="examPdfUrl" placeholder="https://example.com/exam.pdf" />
+            <p class="form-hint">إن أرفقت رابط PDF، سيظهر للطالب بجانب ورقة الإجابات.</p>
+          </div>
+
+          <!-- Questions builder -->
+          <div class="builder-section">
+            <div class="builder-section__head">
+              <h3 class="builder-section__title">الأسئلة</h3>
+              <button type="button" class="btn btn--secondary btn--sm" id="addQuestionBtn">
+                <span>+</span> إضافة سؤال
+              </button>
+            </div>
+            <div id="questionsContainer"></div>
+            <div id="questionsEmpty" class="empty-state empty-state--compact" hidden>
+              <p>أضف سؤالاً واحداً على الأقل.</p>
+            </div>
+          </div>
+
+          <p id="examFormError" class="form-error" hidden></p>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn--ghost" data-close-modal="examBuilderModal">إلغاء</button>
+            <button type="submit" class="btn btn--primary" id="saveExamBtn">حفظ الاختبار</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ================================================================
+         EXAM RESULTS MODAL (for a specific exam, teacher view)
+         ================================================================ -->
+    <div id="examResultsModal" class="modal-overlay" hidden>
+      <div class="modal-box modal-box--md">
+        <button class="modal-close" data-close-modal="examResultsModal" aria-label="إغلاق">&times;</button>
+        <h2 class="modal-box__title" id="examResultsTitle">نتائج الاختبار</h2>
+        <div id="examResultsBody"></div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+         STUDENT PORTAL
+         ================================================================ -->
+    <section id="studentPortal" class="screen">
+      <header class="topbar">
+        <div class="topbar__inner">
+          <div class="topbar__brand">
+            <span class="topbar__icon">&#127891;</span>
+            <span>بوابة الطالب</span>
+          </div>
+          <div class="topbar__actions">
+            <button class="btn btn--ghost btn--sm" id="studentLogoutBtn" type="button">
+              <span>&#8592;</span> خروج
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-body">
+        <div class="panel-head">
+          <h2 class="panel-title">الاختبارات المتاحة</h2>
+        </div>
+
+        <!-- Student name entry -->
+        <div class="student-entry" id="studentEntry">
+          <div class="form-field form-field--lg">
+            <label for="studentName">الاسم الكامل</label>
+            <input type="text" id="studentName" placeholder="اكتب اسمك الكامل" />
+          </div>
+        </div>
+
+        <div id="studentExamsList" class="cards-grid"></div>
+        <div id="studentExamsEmpty" class="empty-state" hidden>
+          <span class="empty-state__icon">&#128221;</span>
+          <p>لا توجد اختبارات متاحة حالياً.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         EXAM TAKING SCREEN
+         ================================================================ -->
+    <section id="examScreen" class="screen">
+      <!-- Exam header with timer -->
+      <header class="exam-header">
+        <div class="exam-header__inner">
+          <div class="exam-header__info">
+            <h2 id="examScreenTitle" class="exam-header__title"></h2>
+            <p id="examScreenStudent" class="exam-header__student"></p>
+          </div>
+          <div class="exam-timer" id="examTimer">
+            <span class="exam-timer__icon">&#9201;</span>
+            <span class="exam-timer__value" id="timerValue">30:00</span>
+          </div>
+        </div>
+        <div class="exam-progress">
+          <div class="exam-progress__bar" id="examProgressBar"></div>
+        </div>
+      </header>
+
+      <div class="exam-body">
+        <!-- PDF side (if attached) -->
+        <div class="exam-pdf" id="examPdfPanel" hidden>
+          <iframe id="examPdfFrame" src="" title="ورقة الاختبار" loading="lazy"></iframe>
+        </div>
+
+        <!-- Questions side -->
+        <div class="exam-questions" id="examQuestionsPanel">
+          <div class="exam-question" id="examQuestionArea"></div>
+
+          <!-- Navigation -->
+          <div class="exam-nav">
+            <button class="btn btn--ghost" id="prevQuestionBtn" type="button" disabled>
+              <span>&#8594;</span> السابق
+            </button>
+            <div class="exam-nav__dots" id="questionDots"></div>
+            <button class="btn btn--secondary" id="nextQuestionBtn" type="button">
+              التالي <span>&#8592;</span>
+            </button>
+          </div>
+
+          <div class="exam-submit-area">
+            <button class="btn btn--primary btn--lg" id="submitExamBtn" type="button">
+              تسليم الاختبار
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         EXAM RESULTS SCREEN (student view)
+         ================================================================ -->
+    <section id="resultScreen" class="screen">
+      <div class="result-container">
+        <div class="result-card" id="resultCard">
+          <!-- populated by script.js -->
+        </div>
+        <div class="result-actions">
+          <button class="btn btn--primary" id="resultBackBtn" type="button">
+            العودة للاختبارات
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         CONFIRM MODAL (generic)
+         ================================================================ -->
+    <div id="confirmModal" class="modal-overlay" hidden>
+      <div class="modal-box modal-box--sm">
+        <h2 class="modal-box__title" id="confirmTitle">تأكيد</h2>
+        <p class="confirm-text" id="confirmText"></p>
+        <div class="modal-actions">
+          <button class="btn btn--ghost" id="confirmCancelBtn" type="button">إلغاء</button>
+          <button class="btn btn--danger" id="confirmOkBtn" type="button">تأكيد</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/script.js"></script>
+  </body>
+</html>
